@@ -32,10 +32,19 @@ def init_webdriver():
 
 
 def do_login(user, password, driver):
+    login_cookie = {}
     try:
         login_node = driver.find_element(By.XPATH, '//uni-view[@class="tBtn"]')
         login_node.click()
         time.sleep(5)
+        cookie_str = ''
+        cookies = driver.get_cookies()
+        for cookie in cookies:
+            cookie_name = cookie['name']
+            cookie_value = cookie['value']
+            cookie_str = cookie_str+cookie_name+'='+cookie_value+';'
+        print(cookie_str)
+        login_cookie['cas_cookie']=cookie_str
         ## 登陆页输入用户名密码登陆
         input_email_node = driver.find_element(By.XPATH,'//input[@id="email-phone"]')
         input_email_node.clear()
@@ -48,28 +57,28 @@ def do_login(user, password, driver):
         login_node = driver.find_element(By.XPATH, '//div[@class="form-btn"]/a[@class="blue"]')
         login_node.click()
         time.sleep(10)
-        dynamic_cookie = driver.execute_script("return document.cookie;")
-        print(dynamic_cookie)
-        account_cookie = ''
+        cookie_str = ''
         cookies = driver.get_cookies()
         for cookie in cookies:
             cookie_name = cookie['name']
             cookie_value = cookie['value']
-            account_cookie = account_cookie+cookie_name+'='+cookie_value+';'
-        print(account_cookie)
-        account_cookie = ''
+            cookie_str = cookie_str+cookie_name+'='+cookie_value+';'
+        print(cookie_str)
+        login_cookie['m_cookie'] = cookie_str
+
         driver.get('https://www.pkulaw.com/')
         time.sleep(5)
         driver.get('https://www.pkulaw.com/chl/8d665e8d2c7a832fbdfb.html?way=homeCommend')
         time.sleep(5)
+        cookie_str = ''
         cookies = driver.get_cookies()
         for cookie in cookies:
             cookie_name = cookie['name']
             cookie_value = cookie['value']
-            account_cookie = account_cookie+cookie_name+'='+cookie_value+';'
-
-        print(account_cookie)
-        return account_cookie
+            cookie_str = cookie_str+cookie_name+'='+cookie_value+';'
+        print(cookie_str)
+        login_cookie['www_cookie'] = cookie_str
+        return login_cookie
     except Exception as e:
         print(e)
 

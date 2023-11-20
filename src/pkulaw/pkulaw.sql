@@ -43,7 +43,7 @@ PRIMARY KEY (`law_id`)
 -- pkulaw.law_id_table definition
 
 CREATE TABLE `law_id_table` (
-`law_info` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '法条详情id',
+`law_id` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '法条详情id',
 `title` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL COMMENT '法条法规标题',
   `is_crawled` int DEFAULT NULL COMMENT '是否采集',
 PRIMARY KEY (`law_info`)

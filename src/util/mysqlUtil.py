@@ -57,5 +57,7 @@ class mysql_util:
 
 if __name__ == '__main__':
     print('start test mysql')
-    mysql_util = mysql_util('localhost',3306,'root',None,'pkulaw')
-    mysql_util.select_data('show tables;')
+    mysql_util = mysql_util('localhost',3306,'root','root','pkulaw')
+    result = mysql_util.select_data('select * from account_table')
+    for account in result:
+        print(account[5])
