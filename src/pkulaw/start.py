@@ -17,6 +17,8 @@ if __name__ == '__main__':
     cookie_manager = threading.Thread(target=cookies.load_cookies)
     cookie_manager.start()
 
+    download_work = threading.Thread(target=Spider.downloader)
+
     #启动列表页翻页获取law_id线程
     threading.Thread(target=Spider.spider_law_id)
 

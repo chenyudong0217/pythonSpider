@@ -78,11 +78,15 @@ def downloader():
             task = None
             if info_task_queue.qsize()>0:
                 task = info_task_queue.get()
+                law_id = task[0]
+                cookie_service.get_one_vip_cookie()
+                download_info()
             elif list_task_queue.qsize()>0:
                 task = list_task_queue.get()
             if task is None:
                 time.sleep(1)
                 continue
+
         except Exception as e:
             print(e)
 
