@@ -48,3 +48,42 @@ CREATE TABLE `law_id_table` (
   `is_crawled` int DEFAULT NULL COMMENT '是否采集',
 PRIMARY KEY (`law_info`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='北大法宝 法规详情id表';
+
+
+INSERT INTO pkulaw.account_table (username,password,phone,is_login,user_type,last_login_time) VALUES
+('王建','DA2023da','15837466531',NULL,2,NULL),
+('王大喜','wang2010','15658097781',NULL,2,NULL),
+('张岩','da300033','18106516970',NULL,2,NULL),
+('田浩','myhexintianhao','13124103006',NULL,2,NULL),
+('张岩','da300033','18106516970',NULL,2,NULL),
+('李翔','DA2023da','13588106946',NULL,2,NULL),
+('萧炎','DA2023da','18850078996',NULL,2,NULL),
+('吴丹丹','DA2023da','18910572403',NULL,2,NULL),
+('王生','kul0714KUL','18666668362',NULL,2,NULL),
+('杨惠泽','12345678','18234132630',NULL,2,NULL);
+INSERT INTO pkulaw.account_table (username,password,phone,is_login,user_type,last_login_time) VALUES
+('洪阳','ths123456','15757176746',NULL,2,NULL),
+('张媛','qwa12345','17324607307',NULL,2,NULL),
+('陈子扬','DA2023da','18106564013',NULL,2,NULL),
+('张浙永','DA2023da','15858269033',NULL,2,NULL),
+('张浙永','DA2023da','15858269033',NULL,2,NULL),
+('张钶','DA2023da','17717088701',NULL,2,NULL),
+('郑腾','DA2023da','15315725634',NULL,2,NULL),
+('刘小璇','DA2023da','19168070268',NULL,2,NULL),
+('梁旭东','DA2023da','13858871954',NULL,2,NULL),
+('肖一丁','DA2023da','18758351880',NULL,2,NULL);
+INSERT INTO pkulaw.account_table (username,password,phone,is_login,user_type,last_login_time) VALUES
+('王启宁','DA2023da','18507046505',NULL,2,NULL),
+('郭硕','DA2023da','18667931984',NULL,2,NULL),
+('石南','DA2023da','15267047759',NULL,2,NULL),
+('江凯睿','DA2023da','15370480224',NULL,2,NULL),
+('陈丁同','DA2023da','181110673509',NULL,2,NULL),
+('李高伟','DA2023da','15993219810',NULL,2,NULL),
+('蒋锦春','DA2023da','18868107903',NULL,2,NULL),
+('马骥','DA2023da','13777833633',NULL,2,NULL),
+('ZL','zl910204','13738266127',NULL,2,NULL),
+('吴梓唯','DA2023da','18983353651',NULL,2,NULL);
+INSERT INTO pkulaw.account_table (username,password,phone,is_login,user_type,last_login_time) VALUES
+('景思聪','DA2023da','15189821626',NULL,2,NULL),
+('徐杨远翔','DA2023da','18811132057',NULL,2,NULL),
+('顾树明','DA1234da','18851835805',NULL,2,NULL);
