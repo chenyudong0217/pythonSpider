@@ -7,7 +7,7 @@ import time
 def init_webdriver():
 
     chrome_options = webdriver.ChromeOptions()
-    ##chrome_options.add_argument('--incognito')
+    chrome_options.add_argument('--incognito')
     chrome_options.add_argument('--disable-javascript')
     chrome_options.add_argument('--no-sandbox')  # 解决DevToolsActivePort文件不存在的报错
     chrome_options.add_argument('window-size=1920x1080')  # 指定浏览器分辨率
@@ -25,15 +25,15 @@ def init_webdriver():
         })
         """
     })
-    driver.get("https://m.pkulaw.com/pages/usercenter/index")
-    driver.get_cookies()
-    time.sleep(5)
     return driver
 
 
-def do_login(user, password, driver):
+def do_login(user, password):
     login_cookie = {}
     try:
+        driver = init_webdriver()
+        driver.get("https://m.pkulaw.com/pages/usercenter/index")
+        time.sleep(5)
         login_node = driver.find_element(By.XPATH, '//uni-view[@class="tBtn"]')
         login_node.click()
         time.sleep(5)
@@ -78,6 +78,9 @@ def do_login(user, password, driver):
             cookie_str = cookie_str+cookie_name+'='+cookie_value+';'
         print(cookie_str)
         login_cookie['www_cookie'] = cookie_str
+        driver.delete_all_cookies()
+        driver.close()
+        driver.quit()
         return login_cookie
     except Exception as e:
         print(e)
@@ -86,6 +89,6 @@ if __name__ == '__main__':
 
     try:
         driver = init_webdriver()
-        do_login('18851677310','qq123456789',driver)
+        do_login('18851677310','qq123456789')
     except Exception as e:
         print(e)
