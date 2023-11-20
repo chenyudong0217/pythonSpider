@@ -2,8 +2,12 @@
 import time
 import requests
 from bs4 import BeautifulSoup
-import cookie
-import law
+import queue
+
+import cookie as cookie_service
+import law as law_service
+info_task_queue = queue.Queue()
+list_task_queue = queue.Queue()
 
 #解析www站 法条详情页信息
 def parse_info(content):
@@ -67,18 +71,33 @@ def download_info(url ,cookie):
 
 def spider_law_id():
     print('spider law_list for law id')
+
+def downloader():
+    while 1:
+        try:
+            task = None
+            if info_task_queue.qsize()>0:
+                task = info_task_queue.get()
+            elif list_task_queue.qsize()>0:
+                task = list_task_queue.get()
+            if task is None:
+                time.sleep(1)
+                continue
+        except Exception as e:
+            print(e)
+
 #抓取详情采集流程逻辑
 def spider_info():
     while 1:
         try:
-            laws = law.get_need_crawl_laws()
-
+            laws = law_service.get_need_crawl_laws()
+            for law in laws:
+                print(law)
+                info_task_queue.put(law)
+                law_service.update_law_crawl_status(law[0],1)
         except Exception as e:
             print(e)
 
 if __name__ == '__main__':
-    cookie = 'xCloseNew=17;Hm_lpvt_8266968662c086f34b2a3e2ae9014bf8=1700117707;authormes=efed66a30653717245e4db4596782e296fea1d25d173b373b73dc5c71c7f22c5973cbbc7b114eedabdfb;double11_2023=true;userislogincookie=true;__tst_status=3355752069#;Hm_up_8266968662c086f34b2a3e2ae9014bf8=%7B%22ysx_yhqx_20220602%22%3A%7B%22value%22%3A%220%22%2C%22scope%22%3A1%7D%2C%22ysx_hy_20220527%22%3A%7B%22value%22%3A%2201%22%2C%22scope%22%3A1%7D%2C%22uid_%22%3A%7B%22value%22%3A%22cf0b5347-e282-ee11-b943-d46cc8e17ef0%22%2C%22scope%22%3A1%7D%2C%22ysx_yhjs_20220602%22%3A%7B%22value%22%3A%221%22%2C%22scope%22%3A1%7D%7D;SUB_LEGACY=37d155a1-ee73-4fea-8804-8afc959229b5;pkulaw_v6_sessionid=bg4kbylsz0mqobxu5rgtlc1w;SUB=37d155a1-ee73-4fea-8804-8afc959229b5;KC_ROOT_LOGIN_LEGACY=1;Hm_lvt_8266968662c086f34b2a3e2ae9014bf8=1700117686;KC_ROOT_LOGIN=1;CookieId=20928bf34ddb978c75a155d8240614e4;referer=;LoginAccount=phone2023111419380736864;referer=https://www.pkulaw.com/;CookieId_LEGACY=20928bf34ddb978c75a155d8240614e4;'
-    for i in range(0,50):
-        download_info('https://www.pkulaw.com/chl/8d665e8d2c7a832fbdfb.html?way=homeCommend',cookie)
-        time.sleep(0.5)
-    print('start pkulaw spider')
+
+    spider_info()

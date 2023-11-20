@@ -21,10 +21,10 @@ def get_need_crawl_laws():
     except Exception as e:
         print(e)
 #更新当前法条采集状态
-#只有采集成功写入库才更新
-def update_law_crawl_status(law_id):
+#0:未采集， 1:采集中，2 采集完成
+def update_law_crawl_status(law_id,status):
     try:
-        sql = "update law_id_table set is_crawled=1 where law_id='"+law_id+"';"
+        sql = "update law_id_table set is_crawled="+str(status)+"where law_id='"+law_id+"';"
         mysqlUtil.update_data(sql)
     except Exception as e:
         print(e)
