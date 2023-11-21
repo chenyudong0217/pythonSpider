@@ -5,9 +5,19 @@ import mysql.connector
 cnx = None
 cursor = None
 class mysql_util:
+    host = ''
+    port = ''
+    user = ''
+    password = ''
+    database = ''
     cnx = None
     #构造mysql_util 类，初始化连接对象
     def __init__(self, host, port, user, password, database):
+        self.host = host
+        self.port = port
+        self.user = user
+        self.password = password
+        self.database = database
         self.cnx = mysql.connector.connect(
             host = host, # 链接地址
             port = port,
@@ -19,6 +29,8 @@ class mysql_util:
     #获取数据库连接对象
     def get_connector(self):
         try:
+            if self.cnx == None:
+                self.cnx = mysql.connector.connect(self.host,self.port,self.user, self.password, self.database)
             cursor = self.cnx.cursor()
             return cursor
         except Exception as e:
@@ -31,7 +43,7 @@ class mysql_util:
             cursor = self.get_connector()
             cursor.execute(sql)
             self.cnx.commit()
-            cursor.close()
+            #cursor.close()
         except Exception as e:
             print(e)
 
@@ -41,7 +53,7 @@ class mysql_util:
             cursor = self.get_connector()
             cursor.execute(sql)
             result = cursor.fetchall();
-            cursor.close();
+            #cursor.close();
             return result
         except Exception as e:
             print(e)
@@ -51,10 +63,16 @@ class mysql_util:
             cursor = self.get_connector()
             cursor.execute(sql)
             self.cnx.commit()
-            cursor.close();
+            #cursor.close();
         except Exception as e:
             print(e)
-
+    def del_data(self,sql):
+        try:
+            cursor = self.get_connector()
+            cursor.execute(sql)
+            self.cnx.commit()
+        except Exception as e:
+            print(e)
 if __name__ == '__main__':
     print('start test mysql')
     mysql_util = mysql_util('localhost',3306,'root','root','pkulaw')

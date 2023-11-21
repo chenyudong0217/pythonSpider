@@ -5,7 +5,8 @@ from bs4 import BeautifulSoup
 import queue
 
 import cookie as cookie_service
-import law as law_service
+import db_func
+
 info_task_queue = queue.Queue()
 list_task_queue = queue.Queue()
 
@@ -72,15 +73,19 @@ def download_info(url ,cookie):
 def spider_law_id():
     print('spider law_list for law id')
 
+#下载执行器，开多个并发执行
 def downloader():
     while 1:
         try:
             task = None
             if info_task_queue.qsize()>0:
                 task = info_task_queue.get()
-                law_id = task[0]
-                cookie_service.get_one_vip_cookie()
-                download_info()
+                law_id = task['law_id']
+                law_url = 'https://www.pkulaw.com/chl/'+law_id+'.html?way=homeCommend'
+                content = download_info(law_url,cookie_service.get_one_vip_cookie())
+                law_info = parse_info(content)
+                db_func.save_law_info(law_id, law_info)
+                db_func.update_law_crawl_status(law_id,2)
             elif list_task_queue.qsize()>0:
                 task = list_task_queue.get()
             if task is None:
@@ -94,14 +99,13 @@ def downloader():
 def spider_info():
     while 1:
         try:
-            laws = law_service.get_need_crawl_laws()
+            laws = db_func.get_need_crawl_laws()
             for law in laws:
                 print(law)
                 info_task_queue.put(law)
-                law_service.update_law_crawl_status(law[0],1)
+                db_func.update_law_crawl_status(law['law_id'],1)
         except Exception as e:
             print(e)
 
 if __name__ == '__main__':
-
     spider_info()
