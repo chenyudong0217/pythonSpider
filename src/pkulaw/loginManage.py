@@ -15,6 +15,7 @@ def login():
             password = account['password']
             user_type = account['user_type']
             cookie_dict = chromeServer.do_login(phone, password)
+            db_func.del_account_cookie(user_id)
             db_func.add_account_cookie(user_id,cookie_dict['www_cookie'], cookie_dict['m_cookie'],cookie_dict['cas_cookie'],user_type)
             db_func.update_account_info(user_id)
             time.sleep(10)
