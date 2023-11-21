@@ -69,7 +69,12 @@ def download_info(url ,cookie):
 
 
 
+def download_law_list(param,token):
+    try:
+        url = 'https://m.pkulaw.com/api/mobile-server/platform-fabao/6.0.0.0.0/search/firstMore'
 
+    except Exception as e:
+        print(e)
 def spider_law_id():
     print('spider law_list for law id')
 
