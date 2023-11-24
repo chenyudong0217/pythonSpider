@@ -8,10 +8,10 @@ from util.sqlpool import PymysqlPool
 
 
 def find_account(user_id):
-    sql = 'select * from account_table where user_id='+str(user_id)
+    sql = 'select * from account_table where id='+str(user_id)
     try:
         mysql = PymysqlPool()
-        need_login_accounts = mysql.getAll(sql=sql)
+        need_login_accounts = mysql.getOne(sql=sql)
         mysql.dispose()
         return need_login_accounts
     except Exception as e:
@@ -104,9 +104,9 @@ def update_law_crawl_status(law_id,status):
     except Exception as e:
         print(e)
 
-def add_law_id(law_id, law_title):
+def add_law_id(law_id, law_title,law_topic_id, law_column_id):
     try:
-        sql = "insert into law_id_table (law_id, title, is_crawled) values ('"+law_id+"', '"+law_title+"', 0);"
+        sql = "insert into law_id_table (topic_id, column_id,law_id, title, is_crawled) values('"+law_topic_id+"','"+law_column_id+"','"+law_id+"', '"+law_title+"', 0);"
         mysql = PymysqlPool()
         mysql.insert(sql=sql)
         mysql.dispose

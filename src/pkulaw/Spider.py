@@ -1,14 +1,42 @@
 # encoding:utf-8
+import sys, os
 import time
 import requests
 from bs4 import BeautifulSoup
 import queue, json
 
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from config.settings import proxy_url
 import cookie as cookie_service
 import db_func
 
+proxy_queue = queue.Queue()
 info_task_queue = queue.Queue()
 list_task_queue = queue.Queue()
+
+
+def getProxy():
+    print('开始申请获取代理ip')
+    url = proxy_url
+    while 1:
+        try:
+            while proxy_queue.qsize()>10:
+                proxy_queue.get()
+            response = requests.request("GET", url, headers={}, data={})
+            content = response.text
+            proxyConfig = json.loads(content)
+            if (proxyConfig['status_code'] == 0):
+                proxies = proxyConfig['proxies']
+                for i in proxies:
+                    if i['name'] == 'vps':
+                        ips = i['proxyInfo']
+                        for ip in ips:
+                            proxy_queue.put(ip)
+            time.sleep(10)
+        except Exception as e:
+            print(e)
+
+    print('退出代理ip获取逻辑')
 
 #解析www站 法条详情页信息
 def parse_info(content):
@@ -70,9 +98,10 @@ def parse_m_list(task, content, cookie):
             endPage = False
         '''开始列表解析'''
         for law in data['info']:
-            db_func.add_law_id(law['gid'],law['title'])
+            db_func.add_law_id(law['gid'],law['title'],law['topicId'],law['columnId'])
     except Exception as e:
         print(e)
+        endPage = False
     return endPage
 
 
@@ -92,7 +121,13 @@ def download_info(url ,cookie):
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'
     }
     try:
-        response = requests.request('GET', url, headers=headers, data=payload)
+        proxyIp = proxy_queue.get()
+        outDateTs = proxyIp['outDateTs']
+        while int(time.time()) > outDateTs:
+            proxyIp = proxy_queue.get()
+            outDateTs = proxyIp['outDateTs']
+        proxy = {'http':str(proxyIp['address']),'https':str(proxyIp['address'])}
+        response = requests.request('GET', url, timeout=(10,10), headers=headers, data=payload, proxies=proxy)
         return response.text
     except Exception as e:
         print(e)
@@ -106,7 +141,7 @@ def download_law_list(task,cookie):
         payload = json.dumps(json.loads(task['params']))
         headers = {
             'Host': 'm.pkulaw.com',
-            'Content-Length': str(len(payload)),
+            'Content-Length': str(len(task['params'])),
             'Authorization': 'Bearer '+cookie['m_cookie'],
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36',
             'content-type': 'application/json',
@@ -114,8 +149,14 @@ def download_law_list(task,cookie):
             'Referer': 'https://m.pkulaw.com/',
             'Accept-Encoding': 'gzip, deflate, br',
         }
-        response = requests.request("POST",url,headers=headers, data=payload)
-        if response.status_code == 401:
+        proxyIp = proxy_queue.get()
+        outDateTs = proxyIp['outDateTs']
+        while int(time.time()) > outDateTs:
+            proxyIp = proxy_queue.get()
+            outDateTs = proxyIp['outDateTs']
+        proxy = {'http':str(proxyIp['address']),'https':str(proxyIp['address'])}
+        response = requests.request("POST",url,headers=headers, data=payload,timeout=(10,10),proxies=proxy)
+        if response.status_code == 401 or response.status_code == 567:
             list_task_queue.put(task)
             ##更新释放cookie
             cookie_service.release_cookie(cookie)
@@ -161,6 +202,7 @@ def downloader():
             if task is None:
                 time.sleep(1)
                 continue
+            time.sleep(1)
         except Exception as e:
             print(e)
 
@@ -181,4 +223,6 @@ def spider_info():
             print(e)
 
 if __name__ == '__main__':
-    spider_info()
+    params = '{"sorts":[{"sort":"IssueDate","sortOrder":"desc"}],"synonym":false,"analyzer":false,"library":"1469238638146621440","size":10,"page":1,"group":null,"scopes":[{"analyzer":false,"keyword":"XA0101","scopes":["EffectivenessDic"],"synonym":false,"termType":4},{"analyzer":false,"keyword":"1949","scopes":["IssueDate"],"synonym":false,"termType":5},{"analyzer":false,"keyword":"02","scopes":["TimelinessDic"],"synonym":false,"termType":4}],"moreScopes":[],"searchType":3}'
+    print(len(json.dumps(json.loads(params))))
+    print(len(params))

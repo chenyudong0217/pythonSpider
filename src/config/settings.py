@@ -1,4 +1,5 @@
 #encoding: utf-8
+proxy_url = 'http://localhost:18885/crawl/proxy/all'
 
 host = 'localhost'
 port = 3306
@@ -15,5 +16,7 @@ dffg_EffectivenessDic = ["XM0701","XM07","XO08","XM0702","XP08","XM0703","XP09",
 year = {'begin':1949,'end':2023}
 #法规分类
 Category = {'begin':1,'end':109}
-#时效性
+#时效性01现行有效，02失效，03已被修改，04尚未实行，05部分时效
 TimelinessDic = ['01','02','03','04','05']
+
+

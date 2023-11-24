@@ -13,7 +13,7 @@ if __name__ == '__main__':
                     laws = result['data']['info']
                     for law in laws:
                         print(law)
-                        insert_law_sql = "insert into law_id_table (law_id, title, is_crawled) values ('"+law['gid']+"', '"+law['title']+"', 0);"
+                        insert_law_sql = "insert into law_id_table (topic_id, column_id,law_id, title, is_crawled) values ('"+law['topicId']+"', '"+law['columnId']+"', '"+law['gid']+"', '"+law['title']+"', 0);"
                         mysqlUtil.insert_data(insert_law_sql)
 
             except Exception as e:

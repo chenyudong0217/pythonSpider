@@ -51,6 +51,7 @@ def get_login_code(url, username, password, encryptionKey, cookie):
         'Cookie': cookie
     }
     response = requests.request("POST", url, headers=headers, data=payload,allow_redirects=False)
+    set_cookie = response.headers.get('set-cookie')
     location = response.headers.get('location')
     if location.__contains__('&code='):
         code = location.split('&code=')[1]
@@ -90,5 +91,5 @@ def login(username, password):
     token = get_token(code)
     return token
 if __name__ == '__main__':
-    print(login('18851835805','DA1234da'))
+    print(login('15837466531','DA2023da'))
 

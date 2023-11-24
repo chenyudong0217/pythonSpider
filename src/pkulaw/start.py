@@ -1,6 +1,5 @@
 # encoding: utf-8
-import sys
-import time
+import sys, os
 import threading
 import loginManage
 import Spider
@@ -8,6 +7,9 @@ import cookie
 
 
 if __name__ == '__main__':
+
+    #启动代理ip加载
+    threading.Thread(target=Spider.getProxy).start()
     #启动cookie登录线程
     #login_manager = threading.Thread(target=loginManage.start)
     #login_manager.start()

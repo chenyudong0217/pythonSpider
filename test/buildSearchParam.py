@@ -45,7 +45,7 @@ if __name__ == '__main__':
                             scopes.append(scope_Category)
                             index = index+1
                             params['scopes'] = scopes
-                            db_func.insert_list_params(json.dumps(params))
+                            #db_func.insert_list_params(json.dumps(params))
                     else:
                         index = index+1
                         scopes = []
@@ -53,5 +53,5 @@ if __name__ == '__main__':
                         scopes.append(scope_IssueDate)
                         scopes.append(scope_TimelinessDic)
                         params['scopes'] = scopes
-                        #db_func.insert_list_params(json.dumps(params))
+                        db_func.insert_list_params(json.dumps(params))
         print(index)
