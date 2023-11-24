@@ -2,13 +2,19 @@
 import random
 import time
 import db_func
-
+import loginManage
 m_cookie_queue = []
 vip_www_cookie_queue = []
 
 #释放无效cookie， 删除cookie表对应记录，更新account is_login = 0
-def release_cookie(self):
+def release_cookie(cookie):
     print('release cookie')
+    user_id = cookie['user_id']
+    account = db_func.find_account(user_id)
+    cookie_type = cookie['cookie_type']
+    db_func.del_account_cookie(user_id)
+    loginManage.login_account(user_id,account['phone'],account['password'],cookie_type)
+    db_func.update_account_info(user_id)
 
 
 def get_one_vip_cookie():
@@ -38,9 +44,9 @@ def load_cookies():
             for cookie in cookies:
                 cookie_type = cookie['cookie_type']
                 if cookie_type == 1:
-                    vip_www_cookie_queue.append(cookie['www_cookie'])
+                    vip_www_cookie_queue.append(cookie)
                 else:
-                    m_cookie_queue.append(cookie['m_cookie']+';'+cookie['cas_cookie'])
+                    m_cookie_queue.append(cookie)
             time.sleep(30)
         except Exception as e:
             print(e)

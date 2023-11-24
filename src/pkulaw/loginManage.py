@@ -3,7 +3,16 @@ import sys, os
 import time, datetime
 import ChromeCookieServer as chromeServer
 import db_func
+import account as account_service
 
+
+def login_account(user_id, phone, password, user_type):
+    if user_type == 1:
+        cookie_dict = chromeServer.do_login(phone, password)
+        db_func.add_account_cookie(user_id,cookie_dict['www_cookie'], cookie_dict['m_cookie'],cookie_dict['cas_cookie'],user_type)
+    else:
+        token = account_service.login(phone,password)
+        db_func.add_account_cookie(user_id,'', token.strip(), '', user_type)
 
 #获取需要登录账号信息，实现模拟登录，更新cookie表
 def login():
@@ -14,9 +23,8 @@ def login():
             phone = account['phone']
             password = account['password']
             user_type = account['user_type']
-            cookie_dict = chromeServer.do_login(phone, password)
             db_func.del_account_cookie(user_id)
-            db_func.add_account_cookie(user_id,cookie_dict['www_cookie'], cookie_dict['m_cookie'],cookie_dict['cas_cookie'],user_type)
+            login_account(user_id,phone,password,user_type)
             db_func.update_account_info(user_id)
             time.sleep(10)
         except Exception as e:

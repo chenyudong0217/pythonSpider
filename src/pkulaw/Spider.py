@@ -2,7 +2,7 @@
 import time
 import requests
 from bs4 import BeautifulSoup
-import queue
+import queue, json
 
 import cookie as cookie_service
 import db_func
@@ -45,6 +45,36 @@ def parse_info(content):
     info['content'] = content
     return info
 
+## 存储提取的law_id入库，如果需要翻页将翻页params,或者失败重试 丢入任务队列
+#返回任务是否结束
+def parse_m_list(task, content, cookie):
+    endPage = True
+    try:
+        params = task['params']
+        result = json.loads(content)
+        if result['code'] != 200 :
+            if result['code'] == 401:
+                '''token时效,触发account重新登录，cookie重新加载'''
+                cookie_service.release_cookie()
+            list_task_queue.put(task) ##重试请求失败的任务
+            return False
+
+        data = result['data']
+        thisPage = data['page']
+        totalPge = data['totalPage']
+        if totalPge > thisPage and thisPage <= 50: #判断是否符合下翻页条件
+            '''当前页小于最大页数，且小于等于50 表示还是继续下翻页'''
+            params['page'] = thisPage+1
+            task['params'] = params
+            list_task_queue.put(task) #下发下翻页任务
+            endPage = False
+        '''开始列表解析'''
+        for law in data['info']:
+            db_func.add_law_id(law['gid'],law['title'])
+    except Exception as e:
+        print(e)
+    return endPage
+
 
 #下载www站 法条详情页html
 def download_info(url ,cookie):
@@ -55,7 +85,7 @@ def download_info(url ,cookie):
         'Accept-Language': 'zh-CN,zh;q=0.9',
         'Cache-Control': 'max-age=0',
         'Connection': 'keep-alive',
-        'Cookie': cookie,
+        'Cookie': cookie['www_cookie'],
         'Host': 'www.pkulaw.com',
         'Referer': 'https://www.pkulaw.com/',
         'Upgrade-Insecure-Requests': '1',
@@ -69,14 +99,45 @@ def download_info(url ,cookie):
 
 
 
-def download_law_list(param,token):
-    try:
-        url = 'https://m.pkulaw.com/api/mobile-server/platform-fabao/6.0.0.0.0/search/firstMore'
 
+def download_law_list(task,cookie):
+    try:
+        url = 'https://m.pkulaw.com/api/mobile-server/platform-fabao/6.0.0.0.0/search/first'
+        payload = json.dumps(json.loads(task['params']))
+        headers = {
+            'Host': 'm.pkulaw.com',
+            'Content-Length': str(len(payload)),
+            'Authorization': 'Bearer '+cookie['m_cookie'],
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36',
+            'content-type': 'application/json',
+            'Accept': '*/*',
+            'Referer': 'https://m.pkulaw.com/',
+            'Accept-Encoding': 'gzip, deflate, br',
+        }
+        response = requests.request("POST",url,headers=headers, data=payload)
+        if response.status_code == 401:
+            list_task_queue.put(task)
+            ##更新释放cookie
+            cookie_service.release_cookie(cookie)
+        return response.text
     except Exception as e:
         print(e)
+
+# 从db中获取需要采集的list_params条件
 def spider_law_id():
     print('spider law_list for law id')
+    while 1:
+        try:
+            ##空值调出频次，避免下游堵塞任务无脑调出撑爆内存队列
+            if list_task_queue.qsize() > 50:
+                time.sleep(2)
+                continue
+            result = db_func.find_list_params()
+            list_task_queue.put(result)
+            db_func.update_list_task(result['id'],1)
+            time.sleep(0.1)
+        except Exception as e:
+            print(e)
 
 #下载执行器，开多个并发执行
 def downloader():
@@ -93,10 +154,13 @@ def downloader():
                 db_func.update_law_crawl_status(law_id,2)
             elif list_task_queue.qsize()>0:
                 task = list_task_queue.get()
+                cookie = cookie_service.get_one_m_cookie()
+                content = download_law_list(task = task, cookie=cookie)
+                if parse_m_list(task,content,cookie):
+                    db_func.update_list_task(task['id'],2)
             if task is None:
                 time.sleep(1)
                 continue
-
         except Exception as e:
             print(e)
 
@@ -104,11 +168,15 @@ def downloader():
 def spider_info():
     while 1:
         try:
+            if info_task_queue.qsize() > 100:
+                time.sleep(2)
+                continue
             laws = db_func.get_need_crawl_laws()
             for law in laws:
                 print(law)
                 info_task_queue.put(law)
                 db_func.update_law_crawl_status(law['law_id'],1)
+            time.sleep(1)
         except Exception as e:
             print(e)
 

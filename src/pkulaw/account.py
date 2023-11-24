@@ -25,7 +25,6 @@ def get_token(code):
               }
     try:
         response = requests.request("POST", url, headers=header, data=payload)
-        print(response.text)
         token = json.loads(response.text)['access_token']
     except Exception as e:
         print(e)
@@ -53,7 +52,6 @@ def get_login_code(url, username, password, encryptionKey, cookie):
     }
     response = requests.request("POST", url, headers=headers, data=payload,allow_redirects=False)
     location = response.headers.get('location')
-    print(location)
     if location.__contains__('&code='):
         code = location.split('&code=')[1]
     if location.__contains__('?code='):
@@ -90,9 +88,7 @@ def login(username, password):
     login_param = open_login_html();
     code = get_login_code(login_param['login_url'], username, cryptojs.encryption(password, login_param['encryptionKey']),login_param['encryptionKey'],login_param['login_cookie'])
     token = get_token(code)
-    print('access_token :'+token)
-    return
+    return token
 if __name__ == '__main__':
-
-    login('17600888379','Cyd0217@')
+    print(login('18851835805','DA1234da'))
 

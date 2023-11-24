@@ -5,10 +5,22 @@ import time
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from util.sqlpool import PymysqlPool
 
+
+
+def find_account(user_id):
+    sql = 'select * from account_table where user_id='+str(user_id)
+    try:
+        mysql = PymysqlPool()
+        need_login_accounts = mysql.getAll(sql=sql)
+        mysql.dispose()
+        return need_login_accounts
+    except Exception as e:
+        print(e)
+
 #查找需要登录的账号信息
 def find_need_login_account():
     #需要登录的账号状态，初始is_login=null, cookie时效 is_login=2, cookie超时 currtime-last_login_time > 1 小时
-    sql = "select * from account_table where is_login is null or is_login=2 or last_login_time < '"+time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()-3600))+"';"
+    sql = "select * from account_table where is_login is null or is_login=2 or last_login_time < '"+time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()-1800))+"';"
     try:
         mysql = PymysqlPool()
         need_login_accounts = mysql.getAll(sql=sql)
@@ -49,7 +61,7 @@ def del_account_cookie(user_id):
 
 ##查找所有cookie
 def find_all_cookie():
-    find_all_cookie_sql = 'select cookie_type, m_cookie, www_cookie, cas_cookie from cookie_table'
+    find_all_cookie_sql = 'select * from cookie_table'
     try:
         mysql = PymysqlPool()
         cookies = mysql.getAll(sql=find_all_cookie_sql)
@@ -92,6 +104,14 @@ def update_law_crawl_status(law_id,status):
     except Exception as e:
         print(e)
 
+def add_law_id(law_id, law_title):
+    try:
+        sql = "insert into law_id_table (law_id, title, is_crawled) values ('"+law_id+"', '"+law_title+"', 0);"
+        mysql = PymysqlPool()
+        mysql.insert(sql=sql)
+        mysql.dispose
+    except Exception as e:
+        print(e)
 
 #新增法条详情
 def save_law_info(law_id,law_info):
@@ -107,6 +127,36 @@ def save_law_info(law_id,law_info):
         sql = "insert into law_info_table (law_id,title,issue_department,issue_date,implement_date,timeliness_dic,effectiveness_dic,category,content) values ('"+law_id+"','"+title+"','"+issue_department+"','"+issue_date+"','"+implement_date+"','"+timeliness_dic+"','"+effectiveness_dic+"','"+category+"','"+content+"');"
         mysql = PymysqlPool()
         mysql.insert(sql=sql)
-        mysql.dispose
+        mysql.dispose()
+    except Exception as e:
+        print(e)
+
+#从库中调出需要翻页的列表检索条件
+
+def find_list_params():
+    '''执行查找前num条需要抓取的list任务'''
+    try:
+        sql = 'select id, params from law_list_params_table where is_crawl=0 limit 1'
+        mysql = PymysqlPool()
+        list_task = mysql.getOne(sql=sql)
+        mysql.dispose()
+        return list_task
+    except Exception as e:
+        print(e)
+
+def update_list_task(id,status):
+    try:
+        sql = 'update law_list_params_table set is_crawl='+str(status)+' where id='+str(id)
+        mysql = PymysqlPool()
+        mysql.update(sql=sql)
+        mysql.dispose()
+    except Exception as e:
+        print(e)
+def insert_list_params(params):
+    try:
+        sql = "insert into law_list_params_table (params,is_crawl) values ('"+params+"',0)"
+        mysql = PymysqlPool()
+        mysql.insert(sql=sql)
+        mysql.dispose()
     except Exception as e:
         print(e)

@@ -20,8 +20,8 @@ if __name__ == '__main__':
     download_work = threading.Thread(target=Spider.downloader)
     download_work.start()
     #启动列表页翻页获取law_id线程
-    #threading.Thread(target=Spider.spider_law_id)
-
+    list_schedule = threading.Thread(target=Spider.spider_law_id)
+    list_schedule.start()
     #启动详情页抓取线程
     info_schedule = threading.Thread(target=Spider.spider_info)
-    info_schedule.start()
+    #info_schedule.start()
