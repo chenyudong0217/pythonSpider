@@ -20,7 +20,7 @@ def getProxy():
     url = proxy_url
     while 1:
         try:
-            while proxy_queue.qsize()>10:
+            while proxy_queue.qsize()>20:
                 proxy_queue.get()
             response = requests.request("GET", url, headers={}, data={})
             content = response.text
@@ -31,6 +31,8 @@ def getProxy():
                     if i['name'] == 'vps':
                         ips = i['proxyInfo']
                         for ip in ips:
+                            if ip['interval'] >= 300:
+                                continue
                             proxy_queue.put(ip)
             time.sleep(10)
         except Exception as e:
@@ -78,7 +80,7 @@ def parse_info(content):
 def parse_m_list(task, content, cookie):
     endPage = True
     try:
-        params = task['params']
+        params = json.loads(task['params'])
         result = json.loads(content)
         if result['code'] != 200 :
             if result['code'] == 401:
@@ -92,12 +94,14 @@ def parse_m_list(task, content, cookie):
         totalPge = data['totalPage']
         if totalPge > thisPage and thisPage <= 50: #判断是否符合下翻页条件
             '''当前页小于最大页数，且小于等于50 表示还是继续下翻页'''
-            params['page'] = thisPage+1
-            task['params'] = params
+            next_page = thisPage+1
+            params['page'] = next_page
+            task['params'] = json.dumps(params)
             list_task_queue.put(task) #下发下翻页任务
             endPage = False
         '''开始列表解析'''
         for law in data['info']:
+            print('insert law id:',str(law))
             db_func.add_law_id(law['gid'],law['title'],law['topicId'],law['columnId'])
     except Exception as e:
         print(e)
@@ -156,13 +160,15 @@ def download_law_list(task,cookie):
             outDateTs = proxyIp['outDateTs']
         proxy = {'http':str(proxyIp['address']),'https':str(proxyIp['address'])}
         response = requests.request("POST",url,headers=headers, data=payload,timeout=(10,10),proxies=proxy)
-        if response.status_code == 401 or response.status_code == 567:
+        if response.status_code == 401 or response.status_code == 567: #401token失效， 567出口ip被限制
             list_task_queue.put(task)
             ##更新释放cookie
-            cookie_service.release_cookie(cookie)
+            if response.status_code == 401:
+                cookie_service.release_cookie(cookie)
         return response.text
     except Exception as e:
         print(e)
+        list_task_queue.put(task)
 
 # 从db中获取需要采集的list_params条件
 def spider_law_id():
@@ -195,6 +201,7 @@ def downloader():
                 db_func.update_law_crawl_status(law_id,2)
             elif list_task_queue.qsize()>0:
                 task = list_task_queue.get()
+                print('begin task ',task)
                 cookie = cookie_service.get_one_m_cookie()
                 content = download_law_list(task = task, cookie=cookie)
                 if parse_m_list(task,content,cookie):
@@ -202,7 +209,7 @@ def downloader():
             if task is None:
                 time.sleep(1)
                 continue
-            time.sleep(1)
+            time.sleep(3)
         except Exception as e:
             print(e)
 

@@ -15,7 +15,7 @@ def release_cookie(cookie):
     db_func.del_account_cookie(user_id)
     loginManage.login_account(user_id,account['phone'],account['password'],cookie_type)
     db_func.update_account_info(user_id)
-
+    load()
 
 def get_one_vip_cookie():
     try:
@@ -33,20 +33,22 @@ def get_one_m_cookie():
     except Exception as e:
         print(e)
 
+def load():
+    m_cookie_queue.clear()
+    vip_www_cookie_queue.clear()
+    cookies = db_func.find_all_cookie()
+    for cookie in cookies:
+        cookie_type = cookie['cookie_type']
+        if cookie_type == 1:
+            vip_www_cookie_queue.append(cookie)
+        else:
+            m_cookie_queue.append(cookie)
 #周期加载库中可用cookie到字典中，
 def load_cookies():
     print('加载db中的可用cookie到 缓存中')
     while 1:
         try:
-            m_cookie_queue.clear()
-            vip_www_cookie_queue.clear()
-            cookies = db_func.find_all_cookie()
-            for cookie in cookies:
-                cookie_type = cookie['cookie_type']
-                if cookie_type == 1:
-                    vip_www_cookie_queue.append(cookie)
-                else:
-                    m_cookie_queue.append(cookie)
+            load()
             time.sleep(30)
         except Exception as e:
             print(e)

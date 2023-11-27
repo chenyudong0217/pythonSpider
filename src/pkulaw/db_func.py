@@ -109,7 +109,7 @@ def add_law_id(law_id, law_title,law_topic_id, law_column_id):
         sql = "insert into law_id_table (topic_id, column_id,law_id, title, is_crawled) values('"+law_topic_id+"','"+law_column_id+"','"+law_id+"', '"+law_title+"', 0);"
         mysql = PymysqlPool()
         mysql.insert(sql=sql)
-        mysql.dispose
+        mysql.dispose()
     except Exception as e:
         print(e)
 
