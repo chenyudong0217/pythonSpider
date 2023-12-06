@@ -106,6 +106,7 @@ def update_law_crawl_status(law_id,status):
 
 def add_law_id(law_id, law_title,law_topic_id, law_column_id):
     try:
+        print('add law_id: %s, title: %s',(law_id,law_title))
         sql = "insert into law_id_table (topic_id, column_id,law_id, title, is_crawled) values('"+law_topic_id+"','"+law_column_id+"','"+law_id+"', '"+law_title+"', 0);"
         mysql = PymysqlPool()
         mysql.insert(sql=sql)
@@ -113,6 +114,25 @@ def add_law_id(law_id, law_title,law_topic_id, law_column_id):
     except Exception as e:
         print(e)
 
+#新增法条标签卡片信息
+def save_law_card(law_id, card):
+    try:
+        sql = "insert into law_info_table(law_id,card) values('"+law_id+"','"+card+"')"
+        mysql = PymysqlPool()
+        mysql.insert(sql=sql)
+        mysql.dispose()
+    except Exception as e:
+        print(e)
+
+def save_law_info_m(law_id, title, content):
+    try:
+        sql = "update law_info_table set title='"+title+"', content='"+content+"' where law_id='"+law_id+"'"
+        mysql = PymysqlPool()
+        mysql.update(sql=sql)
+        mysql.dispose()
+        print('save law info, law_id:'+law_id)
+    except Exception as e:
+        print(e)
 #新增法条详情
 def save_law_info(law_id,law_info):
     try:

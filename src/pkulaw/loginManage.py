@@ -7,12 +7,8 @@ import account as account_service
 
 
 def login_account(user_id, phone, password, user_type):
-    if user_type == 1:
-        cookie_dict = chromeServer.do_login(phone, password)
-        db_func.add_account_cookie(user_id,cookie_dict['www_cookie'], cookie_dict['m_cookie'],cookie_dict['cas_cookie'],user_type)
-    else:
-        token = account_service.login(phone,password)
-        db_func.add_account_cookie(user_id,'', token.strip(), '', user_type)
+    token = account_service.login(phone,password)
+    db_func.add_account_cookie(user_id,'', token.strip(), '', user_type)
 
 #获取需要登录账号信息，实现模拟登录，更新cookie表
 def login():
@@ -35,9 +31,9 @@ def start():
     while 1:
         try:
             login()
-            time.sleep(30)
         except Exception as e:
             print(e)
+        time.sleep(30)
 if __name__ == '__main__':
     start()
     print(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()-21600)))

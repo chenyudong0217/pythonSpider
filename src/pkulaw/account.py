@@ -2,8 +2,9 @@
 import  requests
 from bs4 import BeautifulSoup
 import CryptoJsUtil as cryptojs
-import json
+import json,time
 import urllib.parse
+from Spider import proxy_queue
 encryptionKey = '25597edaee9e4eddb07f2d4d1a09eb49'
 
 #基于临时会话code 请求token信息
@@ -24,6 +25,12 @@ def get_token(code):
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36'
               }
     try:
+        # proxyIp = proxy_queue.get()
+        # outDateTs = proxyIp['outDateTs']
+        # while int(time.time()) > outDateTs:
+        #     proxyIp = proxy_queue.get()
+        #     outDateTs = proxyIp['outDateTs']
+        # proxy = {'http':str(proxyIp['address']),'https':str(proxyIp['address'])}
         response = requests.request("POST", url, headers=header, data=payload)
         token = json.loads(response.text)['access_token']
     except Exception as e:
@@ -50,6 +57,13 @@ def get_login_code(url, username, password, encryptionKey, cookie):
         'Accept-Language': 'zh-CN,zh;q=0.9',
         'Cookie': cookie
     }
+    # proxyIp = proxy_queue.get()
+    # outDateTs = proxyIp['outDateTs']
+    # while int(time.time()) > outDateTs:
+    #     proxyIp = proxy_queue.get()
+    #     outDateTs = proxyIp['outDateTs']
+    # proxy = {'http':str(proxyIp['address']),'https':str(proxyIp['address'])}
+
     response = requests.request("POST", url, headers=headers, data=payload,allow_redirects=False)
     set_cookie = response.headers.get('set-cookie')
     location = response.headers.get('location')
@@ -64,6 +78,12 @@ def open_login_html():
     url = "https://cas.pkulaw.com/auth/realms/fabao/protocol/openid-connect/auth?scope=openid&response_type=code&client_id=pkulaw&redirect_uri=https://m.pkulaw.com/"
     payload = {}
     headers = {}
+    # proxyIp = proxy_queue.get()
+    # outDateTs = proxyIp['outDateTs']
+    # while int(time.time()) > outDateTs:
+    #     proxyIp = proxy_queue.get()
+    #     outDateTs = proxyIp['outDateTs']
+    # proxy = {'http':str(proxyIp['address']),'https':str(proxyIp['address'])}
     response = requests.request("GET", url, headers=headers, data=payload)
     content = response.text
     login_param = {}

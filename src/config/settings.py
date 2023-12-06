@@ -19,4 +19,6 @@ Category = {'begin':1,'end':109}
 #时效性01现行有效，02失效，03已被修改，04尚未实行，05部分时效
 TimelinessDic = ['01','02','03','04','05']
 
+ua_list = ['Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36','Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/119.0','Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0']
+
 

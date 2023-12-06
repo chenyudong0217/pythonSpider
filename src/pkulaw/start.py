@@ -11,7 +11,7 @@ if __name__ == '__main__':
     #启动代理ip加载
     threading.Thread(target=Spider.getProxy).start()
     #启动cookie登录线程
-    #login_manager = threading.Thread(target=loginManage.start)
+    login_manager = threading.Thread(target=loginManage.start)
     #login_manager.start()
 
     #cookies = cookie.cookie_service

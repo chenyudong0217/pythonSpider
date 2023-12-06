@@ -11,7 +11,10 @@ function encryption(sourceWord, encryptionKey){
     });
     return encrypted.ciphertext.toString();
 }
-
+function parse(content){
+    result = JSON.parse(content)
+    return result.publish_page
+}
 function helloword(){
     return "hello";
 }
